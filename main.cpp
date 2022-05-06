@@ -48,6 +48,8 @@ int main(int argc, char* args[])
     int alive;
     int time = 0;
     int speed = 1;
+    float mutateRate = 0.1;
+    int highscore = 0;
 
     std::vector<SDL_Texture*>numbers {zero,one,two,three,four,five,six,seven,eight,nine};
 
@@ -99,8 +101,20 @@ int main(int argc, char* args[])
                                 speed--;
                             }
                             break;
+                        case SDLK_r:
+                            speed = 1;
+                            break;
+                        case SDLK_w:
+                            speed += 1000;
+                            break;
                         case SDLK_k:
-                            pop.newGen();
+                            pop.newGen(mutateRate);
+                            break;
+                        case SDLK_e:
+                            mutateRate += 0.01;
+                            break;
+                        case SDLK_d:
+                            mutateRate -= 0.01;
                             break;
                     }
                 }
@@ -126,7 +140,11 @@ int main(int argc, char* args[])
 
         window.writeNumber(numbers,gen,utils::Vector2i(1800,100));
         window.writeNumber(numbers,alive,utils::Vector2i(1800,175));
-        window.writeNumber(numbers,time/(1920/(obs.size()*3)),utils::Vector2i(1800,250));
+        window.writeNumber(numbers,(int)(time/(1920/(obs.size()*3))),utils::Vector2i(1800,250));
+        window.writeNumber(numbers,mutateRate, utils::Vector2i(1800,325));
+        window.writeNumber(numbers,speed, utils::Vector2i(1800,400));
+        window.writeNumber(numbers,highscore, utils::Vector2i(1800,475));
+
 
         window.display();
 
@@ -143,8 +161,10 @@ int main(int argc, char* args[])
                     }
                 }
                 time++;
-                alive = pop.update(obsDist,obsHeight);
+                alive = pop.update(obsDist,obsHeight,mutateRate);
                 if(alive==0){
+                    if (time/(1920/(obs.size()*3))>highscore)
+                        highscore = time/(1920/(obs.size()*3));
                     time = 0;
                     gen++;
                     for(int i=0;i<obs.size();i++){
